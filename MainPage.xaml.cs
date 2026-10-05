@@ -1,3 +1,5 @@
+using CalculateurAge.Views;
+
 namespace CalculateurAge;
 
 public partial class MainPage : ContentPage
@@ -7,27 +9,28 @@ public partial class MainPage : ContentPage
         InitializeComponent();
     }
 
-    // Gestionnaire appelé au clic du bouton Calculer.
-    // sender = le contrôle cliqué ; e = données de l'événement.
-    private void OnCalculerClicked(object? sender, EventArgs e)
+    /// <summary>
+    /// Gestionnaire de clic pour le calcul de l'âge et la navigation.
+    /// </summary>
+    private async void OnCalculerClicked(object? sender, EventArgs e)
     {
-        // Validation : on refuse un nom vide.
+        // Validation : le nom ne doit pas être vide
         if (string.IsNullOrWhiteSpace(entryNom.Text))
         {
-            DisplayAlert("Erreur", "Entrez un nom", "OK");
-            return; // on sort sans rien calculer
+            await DisplayAlert("Erreur", "Entrez un nom", "OK");
+            return;
         }
 
-        DateTime d = pickerDate.Date ?? DateTime.Today;
-        int age = DateTime.Today.Year - d.Year;
+        DateTime dateNaissance = pickerDate.Date ?? DateTime.Today;
+        int age = DateTime.Today.Year - dateNaissance.Year;
 
-        // Si l'anniversaire n'est pas encore passé cette année,
-        // on retire une année.
-        if (d.Date > DateTime.Today.AddYears(-age)) age--;
+        // Ajustement si l'anniversaire n'a pas encore eu lieu cette année
+        if (dateNaissance.Date > DateTime.Today.AddYears(-age))
+        {
+            age--;
+        }
 
-        // On écrit DIRECTEMENT dans les contrôles : c'est
-        // précisément ce que le MVVM va supprimer.
-        lblResultat.Text = $"{entryNom.Text}, vous avez {age} ans";
-        lblResultat.IsVisible = true;
+        // Navigation vers la page de résultat avec transmission des paramètres via l'URL
+        await Shell.Current.GoToAsync($"{nameof(ResultatPage)}?nom={entryNom.Text}&age={age}");
     }
 }
